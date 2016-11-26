@@ -22,7 +22,7 @@ class Application {
 	}
 
 	/**
-	 * Configuration that customizes 404 errors by redirecting them to the main home page
+	 * Configuration that customizes 404 and 405 errors by redirecting them to the main home page
 	 * where information about usage of the service can be found.
 	 */
 	@Bean
@@ -31,7 +31,9 @@ class Application {
 			@Override
 			public void customize(ConfigurableEmbeddedServletContainer container) {
 				ErrorPage error404Page = new ErrorPage(HttpStatus.NOT_FOUND, "/");
+				ErrorPage error405Page = new ErrorPage(HttpStatus.METHOD_NOT_ALLOWED, "/");
 				container.addErrorPages(error404Page);
+				container.addErrorPages(error405Page);
 			}
 		};
 	}
