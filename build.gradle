@@ -22,12 +22,9 @@ buildscript {
 /* BASIC PLUGINS FOR SPRING BOOT WITH GROOVY ON INTELLIJ */
 apply plugin: 'groovy'
 apply plugin: 'idea'
-apply plugin: 'spring-boot'
+apply plugin: 'org.springframework.boot'
 apply plugin: 'propdeps'
 apply plugin: 'propdeps-idea'
-
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
 
 repositories {
 	mavenLocal()
