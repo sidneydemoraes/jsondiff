@@ -89,13 +89,13 @@ class DiffController {
 	 * @param response
 	 * @return
 	 */
-	@ExceptionHandler(value = InvalidDiffIdException.class)
-	public ModelAndView handleInvalidDiffIdException() {
-		log.info("Invalid diffId passed through into the application.")
+	@ExceptionHandler(value = Exception.class)
+	public ModelAndView handleInvalidDiffIdException(Exception e) {
 		ModelAndView mv = new ModelAndView()
 		mv.setStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 		mv.setViewName("forward:/")
-		mv.addObject("errorMessage", "Something that should not have happened has happened!")
+		mv.addObject("errorMessage",
+				"Something that should not have happened has happened! ${e.message}")
 		return mv
 	}
 
