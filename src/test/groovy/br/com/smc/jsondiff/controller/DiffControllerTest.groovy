@@ -28,7 +28,7 @@ class DiffControllerTest extends Specification {
 	def "receiveJsonForDiff -> success"() {
 		given:
 			def diffId = "1234"
-			def json = ""
+			def json = "{}"
 			controller.mapper = Spy(ObjectMapper.class)
 		when:
 			def result = controller.receiveJsonForDiff(diffId, JsonPosition.LEFT, json)
