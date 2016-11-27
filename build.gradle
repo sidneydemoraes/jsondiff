@@ -46,9 +46,6 @@ dependencies {
 	compile 'org.springframework.boot:spring-boot-starter-data-jpa'
 	compile 'com.h2database:h2'
 
-	/* VIEW LAYER WITH THYMELEAF */
-	compile "org.springframework.boot:spring-boot-starter-thymeleaf" 
-
 	/* TESTING FRAMEWORKS */
 	testCompile 'junit:junit' 
 	testCompile 'org.spockframework:spock-spring' 
