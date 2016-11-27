@@ -5,17 +5,23 @@ import br.com.smc.jsondiff.model.JsonPositionBinder
 import br.com.smc.jsondiff.service.ModelHandler
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Controller
+import org.springframework.validation.BindingResult
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.servlet.ModelAndView
 
+import javax.servlet.http.HttpServletResponse
+import javax.validation.ConstraintViolationException
 import javax.validation.Valid
 import javax.validation.constraints.Pattern
 
 /**
  * Controller responsible for requests directed to the Diff function.
  */
-@RestController
+@Controller
 @RequestMapping(value = "/v1/diff")
 @Validated
 class DiffController {
@@ -32,13 +38,21 @@ class DiffController {
 			method = RequestMethod.POST,
 			consumes = "application/json",
 			produces = "application/json")
+	@ResponseBody
 	public String receiveJsonForDiff(
 			@Valid @Pattern(regexp = "[\\w\\d]{1,16}") @PathVariable String diffId,
 			@PathVariable JsonPosition position,
-			@RequestBody String jsonString) {
+			@RequestBody String jsonString,
+			BindingResult bindingResult,
+			HttpServletResponse response) {
 
 		log.debug("New ${position.name()} Json sent for id [${diffId}].")
 		log.debug(jsonString)
+
+		if(bindingResult.hasErrors()) {
+			response.setStatus(HttpStatus.BAD_REQUEST)
+			response.sendRedirect("/")
+		}
 
 		handler.processDiffId(diffId)
 		handler.processJson(jsonString, position)
@@ -55,6 +69,22 @@ class DiffController {
 	@InitBinder
 	void initBinder(final WebDataBinder binder) {
 		binder.registerCustomEditor(JsonPosition.class, new JsonPositionBinder());
+	}
+
+	/**
+	 * Handler responsible for errors raised when validating path variables from this controller.
+	 *
+	 * @param ex
+	 * @param response
+	 * @return
+	 */
+	@ExceptionHandler(value = ConstraintViolationException.class)
+	public ModelAndView handleValidationException() {
+		log.info("Detected attempt to enter invalid character on URL.")
+		ModelAndView mv = new ModelAndView()
+		mv.setStatus(HttpStatus.BAD_REQUEST)
+		mv.setViewName("forward:/")
+		return mv
 	}
 
 
