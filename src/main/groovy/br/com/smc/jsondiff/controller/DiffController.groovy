@@ -1,5 +1,7 @@
 package br.com.smc.jsondiff.controller
 
+import br.com.smc.jsondiff.exception.InvalidDiffIdException
+import br.com.smc.jsondiff.model.DiffObject
 import br.com.smc.jsondiff.model.JsonPosition
 import br.com.smc.jsondiff.model.JsonPositionBinder
 import br.com.smc.jsondiff.service.ModelHandler
@@ -44,11 +46,11 @@ class DiffController {
 			@PathVariable JsonPosition position,
 			@RequestBody String jsonString) {
 
-		log.debug("New ${position.name()} Json sent for id [${diffId}].")
+		log.info("New ${position.name()} Json sent for id [${diffId}].")
 		log.debug(jsonString)
 
-		handler.processDiffId(diffId)
-		handler.processJson(jsonString, position)
+		def diffObject = handler.processDiffId(diffId)
+		handler.processJson(diffObject, jsonString, position)
 
 		return "${position.name()} Json stored successfully for id ${diffId}"
 	}
@@ -77,6 +79,23 @@ class DiffController {
 		ModelAndView mv = new ModelAndView()
 		mv.setStatus(HttpStatus.BAD_REQUEST)
 		mv.setViewName("forward:/")
+		return mv
+	}
+
+	/**
+	 * Handler responsible for errors raised due to invalid diffId that may pass through.
+	 *
+	 * @param ex
+	 * @param response
+	 * @return
+	 */
+	@ExceptionHandler(value = InvalidDiffIdException.class)
+	public ModelAndView handleInvalidDiffIdException() {
+		log.info("Invalid diffId passed through into the application.")
+		ModelAndView mv = new ModelAndView()
+		mv.setStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+		mv.setViewName("forward:/")
+		mv.addObject("errorMessage", "Something that should not have happened has happened!")
 		return mv
 	}
 
