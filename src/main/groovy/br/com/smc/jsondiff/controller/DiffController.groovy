@@ -6,7 +6,6 @@ import br.com.smc.jsondiff.model.JsonPosition
 import br.com.smc.jsondiff.model.JsonPositionBinder
 import br.com.smc.jsondiff.service.DiffExecutor
 import br.com.smc.jsondiff.service.ModelHandler
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -56,7 +55,7 @@ class DiffController {
 		def diffObject = handler.processDiffId(diffId)
 		handler.processJson(diffObject, transformedJson, position)
 
-		return "${position.name()} Json stored successfully for id ${diffId}"
+		return "{\"sucess\": \"${position.name()} Json stored successfully for id ${diffId}\"}"
 	}
 
 
@@ -158,6 +157,4 @@ class DiffController {
 	ModelHandler handler
 	@Autowired
 	DiffExecutor executor
-	@Autowired
-	ObjectMapper mapper
 }
