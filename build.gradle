@@ -49,6 +49,8 @@ dependencies {
 	testCompile('junit:junit')
 	testCompile('org.spockframework:spock-spring')
 	testCompile('org.springframework:spring-test')
+	testCompile('cglib:cglib-nodep:3.2.4')
+	testCompile('org.objenesis:objenesis:2.4')
 }
 
 task wrapper(type: Wrapper) {
