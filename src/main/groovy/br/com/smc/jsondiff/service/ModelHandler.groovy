@@ -34,14 +34,48 @@ class ModelHandler {
 			diff = new DiffObject(
 					id: diffId
 			)
-			repo.save(diff)
+			diff = repo.saveAndFlush(diff)
 		}
 
+		log.info("Diff with diffId ${diffId} stored.")
 		return diff
 	}
 
-	def processJson(DiffObject o, String s, JsonPosition position) {
+	/**
+	 * This method applies a new JSON to the passed @{link DiffObject} and saves the new
+	 * composition to the database.
+	 *
+	 * @param diff
+	 * @param json
+	 * @param position
+	 * @return
+	 */
+	public DiffObject processJson(DiffObject diff, String json, JsonPosition position) {
 
+		if (!(diff && json && position)){
+			log.error("Failure: unable to process with null argument. diffId: ${diff?.id} | json: ${json} | position: ${position?.name()}")
+			throw new IllegalArgumentException("Unable to process with null argument. Check log.")
+		}
+
+		log.info("Applying JSON to diff object with id ${diff.id} on position ${position.name()}.")
+
+		def syncronizedDiff = repo.findOne(diff.id)
+		if (!syncronizedDiff) {
+			log.error("Diff id ${diff.id} not found on database.")
+			throw new NoSuchElementException()
+		}
+
+		if(position == JsonPosition.LEFT) {
+			diff.jsonLeft = json
+		} else {
+			diff.jsonRight = json
+		}
+
+		diff = repo.saveAndFlush(diff)
+
+		log.info("Diff object ${diff.id} udpated on database.")
+
+		return diff
 	}
 
 
