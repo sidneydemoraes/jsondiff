@@ -6,6 +6,7 @@ import br.com.smc.jsondiff.model.JsonPosition
 import br.com.smc.jsondiff.model.JsonPositionBinder
 import br.com.smc.jsondiff.service.DiffExecutor
 import br.com.smc.jsondiff.service.ModelHandler
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView
 import javax.validation.ConstraintViolationException
 import javax.validation.Valid
 import javax.validation.constraints.Pattern
+import javax.xml.bind.DatatypeConverter
 
 /**
  * Controller responsible for requests directed to the Diff function.
@@ -44,16 +46,20 @@ class DiffController {
 	public String receiveJsonForDiff(
 			@Valid @Pattern(regexp = DiffController.DIFF_ID_PATTERN) @PathVariable String diffId,
 			@PathVariable JsonPosition position,
-			@RequestBody String json) {
+			@RequestBody String jsonParameter) {
 
 		log.info("New ${position.name()} Json sent for id [${diffId}].")
-		log.debug(json)
+		String decodedJson = jsonParameter
+		if(decodedJson.charAt(0) != "{") {
+			log.info("Possible base64 encoded JSON detected")
+			decodedJson = new String(DatatypeConverter.parseBase64Binary(decodedJson))
+		}
+
+		log.debug("Decoded Json: ${decodedJson}")
 		log.debug("Removing tabs from json.")
-		def transformedJson = json.replaceAll(/[\t]+/, '')
-		log.debug("Transformed JSON is ${transformedJson}")
 
 		def diffObject = handler.processDiffId(diffId)
-		handler.processJson(diffObject, transformedJson, position)
+		handler.processJson(diffObject, decodedJson, position)
 
 		return "{\"sucess\": \"${position.name()} Json stored successfully for id ${diffId}\"}"
 	}
@@ -157,4 +163,6 @@ class DiffController {
 	ModelHandler handler
 	@Autowired
 	DiffExecutor executor
+	@Autowired
+	ObjectMapper mapper
 }

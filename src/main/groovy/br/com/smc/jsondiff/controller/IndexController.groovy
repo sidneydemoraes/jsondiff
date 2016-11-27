@@ -31,11 +31,13 @@ class IndexController {
 		 	- Headers
 				"Content-Type" = "application/json"
 			_ Body
-				A Valid JSON.
+				A valid plain JSON or Base64 encoded JSON.
 
 		{YOUR_DIFF_ID} means that you need to pass an alphanumeric identification to the service.
 		This ID will be used to send your second JSON and to get the differences between them.
 		Without that information you will get a NOT_FOUND status.
+
+		IMPORTANT: Notice that your JSON can be Base64 or plain JSON.
 
 
 		Sending your Second JSON
@@ -46,7 +48,7 @@ class IndexController {
 			- Headers
 				"Content-Type" = "application/json"
 			_ Body
-				A Valid JSON.
+				A valid plain JSON or Base64 encoded JSON.
 
 		Remember to use the same {YOUR_DIFF_ID} or else you will create a hole different comparison
 		context. You will not lose your previous one, but will not be able to compare JSONs sent to
