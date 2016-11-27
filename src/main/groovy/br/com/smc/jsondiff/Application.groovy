@@ -7,6 +7,7 @@ import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomi
 import org.springframework.boot.web.servlet.ErrorPage
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpStatus
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor
 
 /**
  * Spring Boot initialization class.
@@ -38,6 +39,15 @@ class Application {
 				container.addErrorPages(error405Page);
 			}
 		};
+	}
+
+	/**
+	 * Configuration that allows Validators to be used on PathVariables and RequestParameters.
+	 * @return
+	 */
+	@Bean
+	public MethodValidationPostProcessor methodValidationPostProcessor() {
+		return new MethodValidationPostProcessor();
 	}
 }
 
