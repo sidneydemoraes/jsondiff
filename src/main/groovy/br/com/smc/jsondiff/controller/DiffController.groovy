@@ -1,12 +1,15 @@
 package br.com.smc.jsondiff.controller
 
+import br.com.smc.jsondiff.exception.InvalidJsonPositionException
+import br.com.smc.jsondiff.model.DiffResult
 import br.com.smc.jsondiff.model.JsonPosition
 import br.com.smc.jsondiff.model.JsonPositionBinder
+import br.com.smc.jsondiff.service.DiffExecutor
 import br.com.smc.jsondiff.service.ModelHandler
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Controller
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.*
@@ -19,7 +22,7 @@ import javax.validation.constraints.Pattern
 /**
  * Controller responsible for requests directed to the Diff function.
  */
-@Controller
+@RestController
 @RequestMapping(value = "/v1/diff")
 @Validated
 class DiffController {
@@ -32,24 +35,46 @@ class DiffController {
 	 * @param jsonString - any JSON.
 	 * @return
 	 */
+
+	public static final String DIFF_ID_PATTERN = "[\\w\\d]{1,16}"
+
 	@RequestMapping(value = "/{diffId}/{position}",
 			method = RequestMethod.POST,
 			consumes = "application/json",
 			produces = "application/json")
-	@ResponseBody
 	public String receiveJsonForDiff(
-			@Valid @Pattern(regexp = "[\\w\\d]{1,16}") @PathVariable String diffId,
+			@Valid @Pattern(regexp = DiffController.DIFF_ID_PATTERN) @PathVariable String diffId,
 			@PathVariable JsonPosition position,
-			@RequestBody String jsonString) {
+			@RequestBody String json) {
 
 		log.info("New ${position.name()} Json sent for id [${diffId}].")
-		log.debug(jsonString)
+		log.debug(json)
+		log.debug("Removing tabs from json.")
+		def transformedJson = json.replaceAll(/[\t]+/, '')
+		log.debug("Transformed JSON is ${transformedJson}")
 
 		def diffObject = handler.processDiffId(diffId)
-		handler.processJson(diffObject, jsonString, position)
+		handler.processJson(diffObject, transformedJson, position)
 
 		return "${position.name()} Json stored successfully for id ${diffId}"
 	}
+
+
+	@RequestMapping(value = "/{diffId}",
+			method = [RequestMethod.POST, RequestMethod.GET],
+			produces = "application/json")
+	public DiffResult performDiff(
+			@Valid @Pattern(regexp = DiffController.DIFF_ID_PATTERN)
+			@PathVariable String diffId) {
+
+		log.info("Request received to generate diff for id ${diffId}")
+
+		def diffResult = executor.executeDiffForDiffId(diffId)
+
+		return diffResult
+	}
+
+
 
 	/**
 	 * Binder responsible for allowing the enum {@link JsonPosition} to be used for validation of
@@ -72,10 +97,31 @@ class DiffController {
 	@ExceptionHandler(value = ConstraintViolationException.class)
 	public ModelAndView handleValidationException() {
 		log.info("Detected attempt to enter invalid character on URL.")
-		ModelAndView mv = new ModelAndView()
-		mv.setStatus(HttpStatus.BAD_REQUEST)
-		mv.setViewName("forward:/")
-		return mv
+		return generateBadRequestModelAndView()
+	}
+
+	/**
+	 * Handler responsible for errors raised when validating {@link JsonPosition} in this
+	 * controller.
+	 *
+	 * @return
+	 */
+	@ExceptionHandler(value = InvalidJsonPositionException.class)
+	public ModelAndView handleInvalidJsonPosition() {
+		log.debug("Invalid JsonPosition attempt detected.")
+		return generateBadRequestModelAndView()
+	}
+
+	/**
+	 * Handler responsible for errors raised when user tried to execute diff without
+	 * storing JSONs first.
+	 *
+	 * @return
+	 */
+	@ExceptionHandler(value = NoSuchElementException.class)
+	public ModelAndView handleNoSuchElement() {
+		log.debug("Diff execution attempt with no Json stored.")
+		return generateBadRequestModelAndView()
 	}
 
 	/**
@@ -90,8 +136,18 @@ class DiffController {
 		ModelAndView mv = new ModelAndView()
 		mv.setStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 		mv.setViewName("forward:/")
-		mv.addObject("errorMessage",
-				"Something that should not have happened has happened! ${e.message}")
+		def message = "Something that should not have happened has happened! ${e.message}"
+		log.warn(message)
+		mv.addObject("errorMessage", message)
+		return mv
+	}
+
+
+
+	private ModelAndView generateBadRequestModelAndView() {
+		ModelAndView mv = new ModelAndView()
+		mv.setStatus(HttpStatus.BAD_REQUEST)
+		mv.setViewName("forward:/")
 		return mv
 	}
 
@@ -100,4 +156,8 @@ class DiffController {
 	Logger log = Logger.getLogger(DiffController.class)
 	@Autowired
 	ModelHandler handler
+	@Autowired
+	DiffExecutor executor
+	@Autowired
+	ObjectMapper mapper
 }
