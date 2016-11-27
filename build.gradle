@@ -34,23 +34,26 @@ repositories {
 //noinspection GroovyAssignabilityCheck
 dependencies {
 	/* SPRING BOOT MAIN DEPENDENCY */
-	compile('org.springframework.boot:spring-boot-starter-web')
+	compile 'org.springframework.boot:spring-boot-starter-web' 
 
 	/* SPRING BOOT DEV TOOLS */
-	compile('org.springframework.boot:spring-boot-devtools')
+	compile 'org.springframework.boot:spring-boot-devtools' 
 
 	/* GROOVY SUPPORT */
-	compile('org.codehaus.groovy:groovy')
+	compile 'org.codehaus.groovy:groovy' 
+
+	/* PERSISTENCE */
+	compile 'org.springframework.boot:spring-boot-starter-data-jpa'
 
 	/* VIEW LAYER WITH THYMELEAF */
-	compile("org.springframework.boot:spring-boot-starter-thymeleaf")
+	compile "org.springframework.boot:spring-boot-starter-thymeleaf" 
 
 	/* TESTING FRAMEWORKS */
-	testCompile('junit:junit')
-	testCompile('org.spockframework:spock-spring')
-	testCompile('org.springframework:spring-test')
-	testCompile('cglib:cglib-nodep:3.2.4')
-	testCompile('org.objenesis:objenesis:2.4')
+	testCompile 'junit:junit' 
+	testCompile 'org.spockframework:spock-spring' 
+	testCompile 'org.springframework:spring-test' 
+	testCompile 'cglib:cglib-nodep:3.2.4' 
+	testCompile 'org.objenesis:objenesis:2.4' 
 }
 
 task wrapper(type: Wrapper) {
