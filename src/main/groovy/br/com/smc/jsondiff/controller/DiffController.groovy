@@ -42,17 +42,10 @@ class DiffController {
 	public String receiveJsonForDiff(
 			@Valid @Pattern(regexp = "[\\w\\d]{1,16}") @PathVariable String diffId,
 			@PathVariable JsonPosition position,
-			@RequestBody String jsonString,
-			BindingResult bindingResult,
-			HttpServletResponse response) {
+			@RequestBody String jsonString) {
 
 		log.debug("New ${position.name()} Json sent for id [${diffId}].")
 		log.debug(jsonString)
-
-		if(bindingResult.hasErrors()) {
-			response.setStatus(HttpStatus.BAD_REQUEST)
-			response.sendRedirect("/")
-		}
 
 		handler.processDiffId(diffId)
 		handler.processJson(jsonString, position)
