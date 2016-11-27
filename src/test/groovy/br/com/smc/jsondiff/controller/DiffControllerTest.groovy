@@ -3,6 +3,7 @@ package br.com.smc.jsondiff.controller
 import br.com.smc.jsondiff.model.DiffObject
 import br.com.smc.jsondiff.model.JsonPosition
 import br.com.smc.jsondiff.service.ModelHandler
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.log4j.Logger
 import spock.lang.Specification
 
@@ -28,6 +29,7 @@ class DiffControllerTest extends Specification {
 		given:
 			def diffId = "1234"
 			def json = ""
+			controller.mapper = Spy(ObjectMapper.class)
 		when:
 			def result = controller.receiveJsonForDiff(diffId, JsonPosition.LEFT, json)
 		then:
