@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service
 class ModelHandler {
 
 	/**
-	 * This method verifies if already exists a @{link DiffObject} with diffId
-	 * on the database. If not it sends for storage, else it returns the @{DiffObject}
+	 * This method verifies if already exists a {@link DiffObject} with diffId
+	 * on the database. If not it sends for storage, else it returns the {@DiffObject}
 	 * to the caller.
 	 *
 	 * @param diffId
@@ -42,7 +42,7 @@ class ModelHandler {
 	}
 
 	/**
-	 * This method applies a new JSON to the passed @{link DiffObject} and saves the new
+	 * This method applies a new JSON to the passed {@link DiffObject} and saves the new
 	 * composition to the database.
 	 *
 	 * @param diff

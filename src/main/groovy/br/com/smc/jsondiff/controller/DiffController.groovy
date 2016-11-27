@@ -1,7 +1,5 @@
 package br.com.smc.jsondiff.controller
 
-import br.com.smc.jsondiff.exception.InvalidDiffIdException
-import br.com.smc.jsondiff.model.DiffObject
 import br.com.smc.jsondiff.model.JsonPosition
 import br.com.smc.jsondiff.model.JsonPositionBinder
 import br.com.smc.jsondiff.service.ModelHandler
@@ -9,13 +7,11 @@ import org.apache.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
-import org.springframework.validation.BindingResult
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
 
-import javax.servlet.http.HttpServletResponse
 import javax.validation.ConstraintViolationException
 import javax.validation.Valid
 import javax.validation.constraints.Pattern
@@ -56,7 +52,7 @@ class DiffController {
 	}
 
 	/**
-	 * Binder responsible for allowing the enum @{JsonPosition} to be used for validation of
+	 * Binder responsible for allowing the enum {@link JsonPosition} to be used for validation of
 	 * path parameters.
 	 *
 	 * @param binder

@@ -1,10 +1,12 @@
 package br.com.smc.jsondiff.model
 
+import br.com.smc.jsondiff.controller.DiffController
+
 import java.beans.PropertyEditorSupport
 
 /**
- * Class that will bind a path variable from @{link DiffController.receiveJsonForDiff}
- * to @{link JsonPosition}
+ * Class that will bind a path variable from {@link DiffController#receiveJsonForDiff}
+ * to {@link JsonPosition}
  */
 class JsonPositionBinder extends PropertyEditorSupport {
 
