@@ -20,6 +20,14 @@ import javax.validation.constraints.Pattern
 @Validated
 class DiffController {
 
+	/**
+	 * Method that receives a JSON for storage for a diff identified by diffId.
+	 *
+	 * @param diffId - alphanumeric data limited to 16 digits.
+	 * @param position - limited to left or right.
+	 * @param jsonString - any JSON.
+	 * @return
+	 */
 	@RequestMapping(value = "/{diffId}/{position}",
 			method = RequestMethod.POST,
 			consumes = "application/json",
@@ -38,7 +46,12 @@ class DiffController {
 		return "${position.name()} Json stored successfully for id ${diffId}"
 	}
 
-
+	/**
+	 * Binder responsible for allowing the enum @{JsonPosition} to be used for validation of
+	 * path parameters.
+	 *
+	 * @param binder
+	 */
 	@InitBinder
 	void initBinder(final WebDataBinder binder) {
 		binder.registerCustomEditor(JsonPosition.class, new JsonPositionBinder());
