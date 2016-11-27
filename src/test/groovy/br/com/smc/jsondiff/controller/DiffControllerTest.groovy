@@ -1,5 +1,6 @@
 package br.com.smc.jsondiff.controller
 
+import br.com.smc.jsondiff.model.DiffObject
 import br.com.smc.jsondiff.model.JsonPosition
 import br.com.smc.jsondiff.service.ModelHandler
 import org.apache.log4j.Logger
@@ -25,13 +26,13 @@ class DiffControllerTest extends Specification {
 
 	def "receiveJsonForDiff -> success"() {
 		given:
-			def diffId = ""
+			def diffId = "1234"
 			def json = ""
 		when:
 			def result = controller.receiveJsonForDiff(diffId, JsonPosition.LEFT, json)
 		then:
 			result != null
-			1 * handler.processDiffId(_)
-			1 * handler.processJson(_ as String, _ as JsonPosition)
+			1 * handler.processDiffId(_) >> new DiffObject(id: diffId)
+			1 * handler.processJson(_ as DiffObject, _ as String, _ as JsonPosition)
 	}
 }
