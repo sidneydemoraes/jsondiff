@@ -13,6 +13,6 @@ class DiffObject {
 
 	@Id
 	String id
-	Object jsonLeft
-	Object jsonRight
+	String jsonLeft
+	String jsonRight
 }
