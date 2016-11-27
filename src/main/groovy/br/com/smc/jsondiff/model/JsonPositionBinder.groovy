@@ -1,6 +1,7 @@
 package br.com.smc.jsondiff.model
 
 import br.com.smc.jsondiff.controller.DiffController
+import br.com.smc.jsondiff.exception.InvalidJsonPositionException
 
 import java.beans.PropertyEditorSupport
 
@@ -11,14 +12,17 @@ import java.beans.PropertyEditorSupport
 class JsonPositionBinder extends PropertyEditorSupport {
 
 	@Override
-	public void setAsText(final String text) throws IllegalArgumentException {
-		if(text){
-			final String capitalized = text.toUpperCase()
-			final JsonPosition position = JsonPosition.valueOf(capitalized)
-			setValue(position);
-		}
-		else{
-			setValue(null);
+	public void setAsText(final String text) throws InvalidJsonPositionException {
+		try {
+			if (text) {
+				final String capitalized = text.toUpperCase()
+				final JsonPosition position = JsonPosition.valueOf(capitalized)
+				setValue(position);
+			} else {
+				setValue(null);
+			}
+		} catch (IllegalArgumentException e) {
+			throw new InvalidJsonPositionException(e)
 		}
 	}
 }
