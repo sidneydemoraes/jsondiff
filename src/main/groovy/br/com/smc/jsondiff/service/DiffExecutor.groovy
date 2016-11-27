@@ -3,6 +3,7 @@ package br.com.smc.jsondiff.service
 import br.com.smc.jsondiff.model.DiffObject
 import br.com.smc.jsondiff.model.DiffResult
 import br.com.smc.jsondiff.repository.DiffRepository
+import com.fasterxml.jackson.databind.ObjectMapper
 import de.danielbechler.diff.ObjectDifferBuilder
 import de.danielbechler.diff.node.DiffNode
 import de.danielbechler.diff.node.Visit
@@ -22,7 +23,15 @@ class DiffExecutor {
 	 * @param diffId
 	 * @return
 	 */
-	public DiffResult executeDiffForDiffId(final String  diffId) {
+
+	public static final String CONCLUSION_NO_JSONS_PROVIDED = "No JSONs were provided."
+	public static final String CONCLUSION_ONLY_LEFT_JSON_FOUND = "Only left JSON was provided."
+	public static final String CONCLUSION_ONLY_RIGHT_JSON_FOUND = "Only right JSON was provided."
+	public static final String CONCLUSION_JSONS_ARE_EQUAL = "JSONs are equal"
+	public static final String CONCLUSION_JSONS_DIFFERENT_SIZE = "JSONs have different sizes"
+	public static final String CONCLUSION_JSONS_DIFFERENT_WITH_SAME_SIZE = "JSONs have same size but are different"
+
+	public DiffResult executeDiffForDiffId(final String diffId) {
 
 		if (!diffId) {
 			def message = "Invalid diffId [${diffId}] provided for diff execution."
@@ -38,15 +47,14 @@ class DiffExecutor {
 			throw new NoSuchElementException()
 		}
 
+		if (!diff.jsonLeft && !diff.jsonRight){
+			return new DiffResult(conclusion: CONCLUSION_NO_JSONS_PROVIDED)
+		}
 		if (diff.jsonLeft && !diff.jsonRight) {
-			return new DiffResult(
-					conclusion: "Only left JSON was provided."
-			)
+			return new DiffResult(conclusion: CONCLUSION_ONLY_LEFT_JSON_FOUND)
 		}
 		if (diff.jsonRight && !diff.jsonLeft) {
-			return new DiffResult(
-					conclusion: "Only right JSON was provided."
-			)
+			return new DiffResult(conclusion: CONCLUSION_ONLY_RIGHT_JSON_FOUND)
 		}
 
 		def result = executeDiffForJsons(diff.jsonLeft, diff.jsonRight)
@@ -69,33 +77,40 @@ class DiffExecutor {
 		DiffResult diffResult = new DiffResult()
 
 		if (jsonLeft == jsonRight) {
-			def conclusion = "JSONs are equal"
-			log.info(conclusion)
-			diffResult.conclusion = conclusion
+			log.info(CONCLUSION_JSONS_ARE_EQUAL)
+			diffResult.conclusion = CONCLUSION_JSONS_ARE_EQUAL
 			return diffResult
 		}
 
 		if (jsonLeft.size() != jsonRight.size()) {
-			def conclusion = "JSONs have different sizes"
-			log.info(conclusion)
-			diffResult.conclusion = conclusion
+			log.info(CONCLUSION_JSONS_DIFFERENT_SIZE)
+			diffResult.conclusion = CONCLUSION_JSONS_DIFFERENT_SIZE
 			return diffResult
 		}
 
-		def conclusion = "JSONs have same size but are different"
+		def conclusion = CONCLUSION_JSONS_DIFFERENT_WITH_SAME_SIZE
 		log.info(conclusion)
 		diffResult.conclusion = conclusion
 
-		final DiffNode diff = ObjectDifferBuilder.buildDefault().compare(jsonRight, jsonLeft)
+		Map<String, Object> baseJson = mapper.readValue(jsonLeft, Map.class)
+		log.debug("JsonLeft mapped to baseJson.")
+		Map<String, Object> workingJson = mapper.readValue(jsonRight, Map.class)
+		log.debug("JsonRight mapped to workingJson.")
+
+		final DiffNode diff = ObjectDifferBuilder.buildDefault().compare(workingJson, baseJson)
+		log.debug("Comparison complete.")
 
 		diffResult.differences = new ArrayList<>()
 		diff.visit(new DiffNode.Visitor(){
 			@Override
 			void node(DiffNode node, Visit visit) {
 				if (node.hasChanges() && !node.hasChildren()) {
-					final Object leftSide = node.canonicalGet(jsonLeft)
-					final Object rightSide = node.canonicalGet(jsonRight)
-					diffResult.differences << "${node.path} from ${leftSide} to ${rightSide}".toString()
+					final Object leftSide = node.canonicalGet(baseJson)
+					final Object rightSide = node.canonicalGet(workingJson)
+					def nodePath = node.path.toString().replaceAll(/[\{\}\/]+/, "/")
+					def detectedDiff = "In ${nodePath}: from ${leftSide} to ${rightSide}".toString()
+					log.debug("Diff found: ${detectedDiff}")
+					diffResult.differences << detectedDiff
 				}
 			}
 		})
@@ -108,5 +123,6 @@ class DiffExecutor {
 	Logger log = Logger.getLogger(DiffExecutor.class)
 	@Autowired
 	DiffRepository repo
-
+	@Autowired
+	ObjectMapper mapper
 }
