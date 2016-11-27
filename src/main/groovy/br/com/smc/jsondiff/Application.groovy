@@ -30,8 +30,10 @@ class Application {
 		return new EmbeddedServletContainerCustomizer() {
 			@Override
 			public void customize(ConfigurableEmbeddedServletContainer container) {
+				ErrorPage error400Page = new ErrorPage(HttpStatus.BAD_REQUEST, "/");
 				ErrorPage error404Page = new ErrorPage(HttpStatus.NOT_FOUND, "/");
 				ErrorPage error405Page = new ErrorPage(HttpStatus.METHOD_NOT_ALLOWED, "/");
+				container.addErrorPages(error400Page);
 				container.addErrorPages(error404Page);
 				container.addErrorPages(error405Page);
 			}
