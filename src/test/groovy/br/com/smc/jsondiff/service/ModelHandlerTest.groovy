@@ -32,7 +32,7 @@ class ModelHandlerTest extends Specification {
 			diff != null
 			diff.id == "1234"
 			1 * repo.findOne(_) >> null
-			1 * repo.save(_)
+			1 * repo.saveAndFlush(_) >> new DiffObject(id: diffId)
 	}
 
 	def "processDiffId -> success -> existing ObjectDiff"(){
@@ -44,7 +44,7 @@ class ModelHandlerTest extends Specification {
 			diff != null
 			diff.id == "1234"
 			1 * repo.findOne(_) >> new DiffObject(id: diffId)
-			0 * repo.save(_)
+			0 * repo.saveAndFlush(_)
 	}
 
 	def "processDiffId -> fail -> diffId empty"(){
@@ -55,7 +55,7 @@ class ModelHandlerTest extends Specification {
 		then:
 			thrown InvalidDiffIdException
 			0 * repo.findOne(_)
-			0 * repo.save(_)
+			0 * repo.saveAndFlush(_)
 	}
 
 	def "processJson -> fail -> null diff"(){
@@ -103,7 +103,7 @@ class ModelHandlerTest extends Specification {
 			handler.processJson(diff, json, position)
 		then:
 			thrown NoSuchElementException
-			1 * repo.findOne(_) >> null
+			1 * repo.findOne(_ as String) >> null
 			0 * repo.saveAndFlush(_)
 	}
 
@@ -113,12 +113,7 @@ class ModelHandlerTest extends Specification {
 					id: "123"
 			)
 			def json =  """
-						{
-							"teste" : "bla",
-							"nivel1" : {
-								"nivel2" : "blabla"
-							}
-						}
+						{"teste" : "bla", "nivel1" : { "nivel2" : "blabla"}}
 						"""
 			def position = JsonPosition.LEFT
 			def resultingDiff = diff
